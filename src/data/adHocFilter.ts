@@ -34,9 +34,16 @@ export class AdHocFilter {
     const filters = validFilters
       .map((f, i) => {
         const key = escapeKey(this._config, f.key);
+        const sqlWildcardOperators = ["LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE"];
+        const operator = convertOperatorToClickHouseOperator(f.operator);
+        // if we have wildcard operator such as LIKE, ILIKE, we need to wrap
+        // filtered value to % for it to be valid SQL wildcard.
+        if (sqlWildcardOperators.includes(operator)) {
+          f.value = `%${f.value}%`;
+        }
+        
         const value = escapeValueBasedOnOperator(f.value, f.operator);
         const condition = i !== validFilters.length - 1 ? (f.condition ? f.condition : 'AND') : '';
-        const operator = convertOperatorToClickHouseOperator(f.operator);
         return ` ${key} ${operator} ${value} ${condition}`;
       })
       .join('');
