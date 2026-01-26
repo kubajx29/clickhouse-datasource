@@ -998,8 +998,6 @@ export class Datasource
       }
     }
 
-    console.log(`Running query: ${tagSource?.source}`);
-
     const results = await this.runQuery({ rawSql: tagSource.source });
     return { type: tagSource.type, frame: results };
   }
