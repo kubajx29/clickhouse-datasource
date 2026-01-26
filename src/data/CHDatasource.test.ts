@@ -110,7 +110,7 @@ describe('ClickHouseDatasource', () => {
       } as CHQuery;
 
       // Mock the ad-hoc filter
-      const adHocFilter = new AdHocFilter();
+      const adHocFilter = new AdHocFilter(null);
 
       // The resolved table name after template variable substitution
       const resolvedSql = 'SELECT * FROM test_db.test_table';

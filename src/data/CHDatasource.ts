@@ -71,7 +71,7 @@ export class Datasource
   constructor(instanceSettings: DataSourceInstanceSettings<CHConfig>) {
     super(instanceSettings);
     this.settings = instanceSettings;
-    this.adHocFilter = new AdHocFilter();
+    this.adHocFilter = new AdHocFilter(this);
   }
 
   getDataProvider(
@@ -851,6 +851,14 @@ export class Datasource
   }
 
   async getTagKeys(): Promise<MetricFindValue[]> {
+
+    const TRANSPOSE_KEYS_VAR = '$clickhouse_transpose_keys';
+    const TRANSPOSE_KEY_PREFIX_VAR = '$clickhouse_transpose_keys_prefix';
+    const transposeKeysToRows: boolean = JSON.parse(getTemplateSrv().replace(TRANSPOSE_KEYS_VAR)) || false;
+    const transposeKeysPrefix: string = getTemplateSrv().replace(TRANSPOSE_KEY_PREFIX_VAR) || '';
+
+    console.log(`Transpose: ${transposeKeysToRows}`);
+
     if (this.adHocFiltersStatus === AdHocFilterStatus.disabled || this.adHocFiltersStatus === AdHocFilterStatus.none) {
       this.adHocFiltersStatus = await this.canUseAdhocFilters();
       if (this.adHocFiltersStatus === AdHocFilterStatus.disabled) {
@@ -859,8 +867,17 @@ export class Datasource
     }
     const { type, frame } = await this.fetchTags();
     if (type === TagType.query) {
-      return frame.fields.map((f) => ({ text: f.name }));
+
+      if(!transposeKeysToRows) {
+        return frame.fields.map((f) => ({ text: f.name }));
+      }
+
+      const view = new DataFrameView(frame);
+      return view.fields?.key.values.map((key) => ({
+        text: `${transposeKeysPrefix}.${key}`
+      }));
     }
+
     const view = new DataFrameView(frame);
     const hideTableName = this.settings.jsonData.hideTableNameInAdhocFilters || false;
     return view.map((item) => ({
@@ -974,6 +991,8 @@ export class Datasource
         this.adHocFilter.setTargetTableFromQuery(tagSource.source);
       }
     }
+
+    console.log(`Running query: ${tagSource?.source}`);
 
     const results = await this.runQuery({ rawSql: tagSource.source });
     return { type: tagSource.type, frame: results };
