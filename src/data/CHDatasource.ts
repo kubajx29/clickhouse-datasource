@@ -859,11 +859,10 @@ export class Datasource
 
     const TRANSPOSE_KEYS_VAR = '$clickhouse_transpose_keys';
     const TRANSPOSE_KEY_PREFIX_VAR = '$clickhouse_transpose_keys_prefix';
-    
-    const transposeKeysToRows: Boolean = Boolean(getTemplateSrv().replace(TRANSPOSE_KEYS_VAR))
-    const transposeKeysPrefix: string = getTemplateSrv().replace(TRANSPOSE_KEY_PREFIX_VAR) || '';
 
-    console.log(`Transpose: ${transposeKeysToRows}`);
+    const transposeKeysToRows: Boolean = Boolean(getTemplateSrv().replace(TRANSPOSE_KEYS_VAR));
+    const transposeKeysPrefixVar: string = getTemplateSrv().replace(TRANSPOSE_KEY_PREFIX_VAR);
+    let transposeKeysPrefix = (transposeKeysPrefixVar === TRANSPOSE_KEY_PREFIX_VAR) ? '' : transposeKeysPrefixVar;
 
     if (this.adHocFiltersStatus === AdHocFilterStatus.disabled || this.adHocFiltersStatus === AdHocFilterStatus.none) {
       this.adHocFiltersStatus = await this.canUseAdhocFilters();
@@ -880,7 +879,7 @@ export class Datasource
 
       const view = new DataFrameView(frame);
       return view.fields?.key.values.map((key) => ({
-        text: `${transposeKeysPrefix}.${key}`
+        text: transposeKeysPrefix ? `${transposeKeysPrefix}.${key}` : key,
       }));
     }
 
