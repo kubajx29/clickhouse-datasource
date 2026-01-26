@@ -26,7 +26,7 @@ import { cloneDeep, isEmpty, isString } from 'lodash';
 import otel from 'otel';
 import { createElement as createReactElement, ReactNode } from 'react';
 import { firstValueFrom, map, Observable } from 'rxjs';
-import { CHConfig } from 'types/config';
+import { CHConfig, AdHocFiltersConfig } from 'types/config';
 import {
   AggregateColumn,
   AggregateType,
@@ -64,6 +64,7 @@ export class Datasource
   annotations = {};
   settings: DataSourceInstanceSettings<CHConfig>;
   adHocFilter: AdHocFilter;
+  adHocFilterConfig: AdHocFiltersConfig;
   skipAdHocFilter = false; // don't apply adhoc filters to the query
   adHocFiltersStatus = AdHocFilterStatus.none; // ad hoc filters only work with CH 22.7+
   adHocCHVerReq = { major: 22, minor: 7 };
@@ -71,7 +72,11 @@ export class Datasource
   constructor(instanceSettings: DataSourceInstanceSettings<CHConfig>) {
     super(instanceSettings);
     this.settings = instanceSettings;
-    this.adHocFilter = new AdHocFilter(this);
+    this.adHocFilterConfig = {
+      hideTableNameInAdhocFilters: this.settings.jsonData.hideTableNameInAdhocFilters || false
+    }
+
+    this.adHocFilter = new AdHocFilter(this.adHocFilterConfig);
   }
 
   getDataProvider(
@@ -854,7 +859,8 @@ export class Datasource
 
     const TRANSPOSE_KEYS_VAR = '$clickhouse_transpose_keys';
     const TRANSPOSE_KEY_PREFIX_VAR = '$clickhouse_transpose_keys_prefix';
-    const transposeKeysToRows: boolean = JSON.parse(getTemplateSrv().replace(TRANSPOSE_KEYS_VAR)) || false;
+    
+    const transposeKeysToRows: Boolean = Boolean(getTemplateSrv().replace(TRANSPOSE_KEYS_VAR))
     const transposeKeysPrefix: string = getTemplateSrv().replace(TRANSPOSE_KEY_PREFIX_VAR) || '';
 
     console.log(`Transpose: ${transposeKeysToRows}`);

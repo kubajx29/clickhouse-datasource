@@ -1,24 +1,13 @@
 import { AdHocVariableFilter } from '@grafana/data';
 import { getTable } from './ast';
-import { Datasource } from './CHDatasource';
-
-
-interface AdhocFiltersConfig {
-  hideTableNameInAdhocFilters?: boolean;
-};
+import { AdHocFiltersConfig } from 'types/config';
 
 export class AdHocFilter {
   private _targetTable = '';
-  private _datasourceInstance: Datasource | null = null;
-  private _config: AdhocFiltersConfig = {}
+  private _config: AdHocFiltersConfig | null = null;
 
-  constructor(instance: Datasource | null) {
-    this._datasourceInstance = instance
-    if (!this._datasourceInstance) {
-      throw new Error(`Datasource instance was null - unable to instantiate AdHocFilter!`)
-    }
-
-    this._config.hideTableNameInAdhocFilters = instance?.settings.jsonData.hideTableNameInAdhocFilters;
+  constructor(filtersConfig: AdHocFiltersConfig | null) {
+    this._config = filtersConfig;
   }
   
 
@@ -88,7 +77,7 @@ function isValid(filter: AdHocVariableFilter): boolean {
   return filter.key !== undefined && filter.key !== '' && filter.operator !== undefined && filter.value !== undefined;
 }
 
-function escapeKey(opts: AdhocFiltersConfig, s: string): string {
+function escapeKey(opts: AdHocFiltersConfig | null, s: string): string {
   if (['ResourceAttributes', 'ScopeAttributes', 'LogAttributes'].includes(s.split('.')[0])) {
     return s;
   }

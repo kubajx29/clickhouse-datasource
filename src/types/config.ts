@@ -136,3 +136,7 @@ export const defaultCHAdditionalSettingsConfig: Partial<CHConfig> = {
     durationUnit: TimeUnit.Nanoseconds,
   },
 };
+
+export interface AdHocFiltersConfig {
+  hideTableNameInAdhocFilters: boolean;
+}
