@@ -857,10 +857,11 @@ export class Datasource
 
   async getTagKeys(): Promise<MetricFindValue[]> {
 
-    const TRANSPOSE_KEYS_VAR = '$clickhouse_transpose_keys';
-    const TRANSPOSE_KEY_PREFIX_VAR = '$clickhouse_transpose_keys_prefix';
+    const TRANSPOSE_KEYS_VAR = 'clickhouse_transpose_keys';
+    const srvTemplateVariables = getTemplateSrv().getVariables();
+    const transposeKeysToRows: Boolean = Boolean(srvTemplateVariables.find(v => v.name === TRANSPOSE_KEYS_VAR));
 
-    const transposeKeysToRows: Boolean = Boolean(getTemplateSrv().replace(TRANSPOSE_KEYS_VAR));
+    const TRANSPOSE_KEY_PREFIX_VAR = '$clickhouse_transpose_keys_prefix';
     const transposeKeysPrefixVar: string = getTemplateSrv().replace(TRANSPOSE_KEY_PREFIX_VAR);
     let transposeKeysPrefix = (transposeKeysPrefixVar === TRANSPOSE_KEY_PREFIX_VAR) ? '' : transposeKeysPrefixVar;
 
@@ -878,9 +879,9 @@ export class Datasource
       }
 
       const view = new DataFrameView(frame);
-      return view.fields?.key.values.map((key) => ({
+      return view.fields.key?.values?.map((key) => ({
         text: transposeKeysPrefix ? `${transposeKeysPrefix}.${key}` : key,
-      }));
+      })) ?? [{ text: 'name' }];
     }
 
     const view = new DataFrameView(frame);

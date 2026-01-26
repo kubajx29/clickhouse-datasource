@@ -13,6 +13,7 @@ import { DataQuery } from '@grafana/schema';
 import { mockDatasource } from '__mocks__/datasource';
 import { cloneDeep } from 'lodash';
 import { Observable, of } from 'rxjs';
+import { AdHocFiltersConfig } from 'types/config';
 import { BuilderMode, ColumnHint, QueryBuilderOptions, QueryType } from 'types/queryBuilder';
 import { CHBuilderQuery, CHQuery, CHSqlQuery, EditorType } from 'types/sql';
 import { AdHocFilter } from './adHocFilter';
@@ -110,7 +111,10 @@ describe('ClickHouseDatasource', () => {
       } as CHQuery;
 
       // Mock the ad-hoc filter
-      const adHocFilter = new AdHocFilter(null);
+      const adHocFilterConfig: AdHocFiltersConfig = {
+        hideTableNameInAdhocFilters: true
+      }
+      const adHocFilter = new AdHocFilter(adHocFilterConfig);
 
       // The resolved table name after template variable substitution
       const resolvedSql = 'SELECT * FROM test_db.test_table';
