@@ -44,7 +44,7 @@ export class AdHocFilter {
         
         const value = escapeValueBasedOnOperator(f.value, f.operator);
         const condition = i !== validFilters.length - 1 ? (f.condition ? f.condition : 'AND') : '';
-        return ` ${key} ${operator} ${value} ${condition}`;
+        return ` toString(${key}) ${operator} toString(${value}) ${condition}`;
       })
       .join('');
 

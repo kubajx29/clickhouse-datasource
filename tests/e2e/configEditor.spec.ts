@@ -1,7 +1,7 @@
 import { expect, test } from '@grafana/plugin-e2e';
 import { Page } from '@playwright/test';
 
-const PLUGIN_UID = 'grafana-clickhouse-datasource';
+const PLUGIN_UID = 'pxfd-grafana-clickhouse-datasource';
 
 // Determine ClickHouse DB URL based on environment
 function resolveClickhouseUrl(env = process.env) {
