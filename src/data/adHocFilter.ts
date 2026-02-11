@@ -36,13 +36,14 @@ export class AdHocFilter {
         const key = escapeKey(this._config, f.key);
         const sqlWildcardOperators = ["LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE"];
         const operator = convertOperatorToClickHouseOperator(f.operator);
+        let preEscapeValue = f.value;
         // if we have wildcard operator such as LIKE, ILIKE, we need to wrap
         // filtered value to % for it to be valid SQL wildcard.
         if (sqlWildcardOperators.includes(operator)) {
-          f.value = `%${f.value}%`;
+          preEscapeValue = `%${f.value}%`;
         }
-        
-        const value = escapeValueBasedOnOperator(f.value, f.operator);
+
+        const value = escapeValueBasedOnOperator(preEscapeValue, f.operator);
         const condition = i !== validFilters.length - 1 ? (f.condition ? f.condition : 'AND') : '';
         return ` toString(${key}) ${operator} toString(${value}) ${condition}`;
       })
@@ -100,7 +101,13 @@ function escapeKey(opts: AdHocFiltersConfig | null, s: string): string {
 
   const hideTableNameInAdhocFilters = opts?.hideTableNameInAdhocFilters || false;
   if (hideTableNameInAdhocFilters) {
-    return s;
+
+    let arr: string[] = [];
+    s.split('.').forEach((part, index) => {
+      arr.push(`\`${part}\``);
+    });
+
+    return arr.join('.');
   }
   return s.includes('.') ? s.split('.').slice(1).join('.') : s;
 }

@@ -19,7 +19,7 @@ export const createTestProps = (overrides: { options?: object; mocks?: object })
       protocol: Protocol.Native,
       username: '',
     },
-    name: 'ClickHouse',
+    name: 'PXFD ClickHouse',
     orgId: 1,
     readOnly: false,
     secureJsonFields: {},
